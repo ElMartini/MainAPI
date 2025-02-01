@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined Orders Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .sub-table {
+            width: 100%;
+            margin-top: 10px;
+            margin-left: 20px;
+        }
+        .sub-table th, .sub-table td {
+            border: none;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>Orders and Customer Orders</h1>
+<button onclick="window.location.href = 'http://localhost:8080/orderService.html';">Order Service</button>
+<table id="combinedTable">
+    <thead>
+    <tr>
+        <th>Order Number</th>
+        <th>Customer ID</th>
+        <th>Total Price</th>
+        <th>Associated Orders</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    async function fetchAndDisplayOrders() {
+        try {
+            const orderResponse = await fetch('http://localhost:8082/api/orders/all');
+            const customerOrdersResponse = await fetch('http://localhost:8082/api/customerOrders/all');
+
+            if (!orderResponse.ok || !customerOrdersResponse.ok) {
+                throw new Error('Failed to fetch data from one or more endpoints');
+            }
+
+            const orders = await orderResponse.json();
+            const customerOrders = await customerOrdersResponse.json();
+
+            const ordersMap = orders.reduce((map, order) => {
+                map[order.oID] = order;
+                return map;
+            }, {});
+
+            const tableBody = document.getElementById('combinedTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            customerOrders.forEach(customerOrder => {
+                const { oNumber, cID, oIDs, oValue} = customerOrder;
+
+                const orderIDs = oIDs.split(',');
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${oNumber}</td>
+                    <td>${cID}</td>
+                    <td>${oValue}</td>
+                    <td>
+                        <table class="sub-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Product Name</th>
+                                    <th>Prodcut Price</th>
+                                    <th>Quantity</th>
+                                    <th>Order Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${orderIDs.map(orderID => {
+                    const order = ordersMap[orderID.trim()];
+                    return order
+                        ? `
+                                            <tr>
+                                                <td>${order.oID}</td>
+                                                <td>${order.pName}</td>
+                                                <td>${(order.pPrice || 0).toFixed(2)}</td>
+                                                <td>${order.pQuantity}</td>
+                                                <td>${(order.oPrice || 0).toFixed(2)}</td>
+                                            </tr>
+                                        `
+                        : `
+                                            <tr>
+                                                <td colspan="4">Order ID ${orderID.trim()} not found</td>
+                                            </tr>
+                                        `;
+                }).join('')}
+                            </tbody>
+                        </table>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error:', error.message);
+            alert('Error fetching or displaying data: ' + error.message);
+        }
+    }
+
+    window.onload = fetchAndDisplayOrders;
+</script>
+</body>
+</html>
