@@ -9,14 +9,9 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
-@Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class CIDwithValue implements Serializable {
-    @JsonProperty("cID")
     private String cID;
-    @JsonProperty("changeValue")
     private double changeValue;
 
     public CIDwithValue(String cID, double changeValue) {
@@ -25,5 +20,21 @@ public class CIDwithValue implements Serializable {
     }
 
     public CIDwithValue() {
+    }
+
+    public String getcID() {
+        return cID;
+    }
+
+    public void setcID(String cID) {
+        this.cID = cID;
+    }
+
+    public double getChangeValue() {
+        return changeValue;
+    }
+
+    public void setChangeValue(double changeValue) {
+        this.changeValue = changeValue;
     }
 }

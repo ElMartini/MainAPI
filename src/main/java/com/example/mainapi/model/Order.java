@@ -25,7 +25,7 @@ public class Order implements Serializable {
     @JsonProperty("pQuantity")
     private int pQuantity;
 
-    @JsonProperty("pPrice")
+    @JsonProperty("oPrice")
     private Double oPrice;
 
     public String getoID() {

@@ -1,19 +1,20 @@
 package com.example.mainapi.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.example.mainapi.model.Product;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BasketDTO {
-    @JsonProperty("pNames")
-    private List<String> pNames;
-    @JsonProperty("pQuantity")
-    private List<Integer> pQuantity;
-
-    @JsonProperty("cID")
+    private List<Product> products;
     private String cID;
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
 
     public String getcID() {
         return cID;
@@ -21,21 +22,5 @@ public class BasketDTO {
 
     public void setcID(String cID) {
         this.cID = cID;
-    }
-
-    public List<String> getpNames() {
-        return pNames;
-    }
-
-    public void setpNames(List<String> pNames) {
-        this.pNames = pNames;
-    }
-
-    public List<Integer> getpQuantity() {
-        return pQuantity;
-    }
-
-    public void setpQuantity(List<Integer> pQuantity) {
-        this.pQuantity = pQuantity;
     }
 }

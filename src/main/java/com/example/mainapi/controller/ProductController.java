@@ -1,42 +1,61 @@
 package com.example.mainapi.controller;
 
+import com.example.mainapi.client.ProductClient;
+import com.example.mainapi.dto.CreateBasketRequestDTO;
 import com.example.mainapi.dto.ProductDTO;
-import com.example.mainapi.dto.ProductToExecuteDTO;
-import com.example.mainapi.kafka.KafkaProducer;
+
+import com.example.mainapi.model.Product;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/p")
+@RequestMapping("/products")
 public class ProductController {
-    final KafkaProducer kafkaProducer;
-    CompletableFuture<Boolean> areProductsAvailabe = new CompletableFuture<>();
 
-    public ProductController(KafkaProducer kafkaProducer) {
-        this.kafkaProducer = kafkaProducer;
+    private final ProductClient productClient;
+
+    @Autowired
+    public ProductController(ProductClient productClient) {
+        this.productClient = productClient;
     }
 
-    @PostMapping("/process")
-    public ResponseEntity<String> processProduct(@RequestBody ProductDTO productDTO) {
-        kafkaProducer.sendProductsActions(productDTO);
-        return ResponseEntity.ok("Action processed: ");
+    @GetMapping("/isProduct")
+    public boolean areProdcutsInStock(@RequestParam String pName, @RequestParam int pQuantity) {
+        return productClient.isProductInStock(pName, pQuantity);
     }
 
-    public boolean areProductsAvailable(ProductToExecuteDTO productToExecuteDTO) throws ExecutionException, InterruptedException {
-        kafkaProducer.sendAreProductsAvailableRequest(productToExecuteDTO);
-        CompletableFuture.allOf(areProductsAvailabe).join();
-
-        return areProductsAvailabe.get();
+    @GetMapping("/getAll")
+    public void getProducts() {
+        List<Product> products = productClient.getProducts();
+        for (Product product : products) {
+            System.out.println(product);
+        }
     }
 
-    public void setAreProductsAvailabeResponse(boolean response){
-        areProductsAvailabe.complete(response);
+    @PostMapping("/add")
+    public boolean addProduct(@RequestBody Product product) {
+        boolean result = productClient.addProduct(product);
+
+        if (result) {
+            System.out.println("Success");
+        } else System.out.println("Not Success");
+
+        return result;
     }
 
+    public boolean deleteProduct(Product product) {
+        return productClient.deleteProduct(product.getpName());
+    }
+
+    public boolean changeQuantity(String pName, int pQuantity) {
+        return productClient.changeQuantity(pName, pQuantity);
+    }
+    public List<Product> createBasket(CreateBasketRequestDTO createBasketRequestDTO){
+        return productClient.createBasket(createBasketRequestDTO);
+    }
 
 
 }
