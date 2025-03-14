@@ -2,41 +2,32 @@ package com.example.mainapi.controller;
 
 import com.example.mainapi.client.ProductClient;
 import com.example.mainapi.dto.CreateBasketRequestDTO;
-import com.example.mainapi.dto.ProductDTO;
 
+import com.example.mainapi.model.ActionStatus;
 import com.example.mainapi.model.Product;
+import feign.FeignException;
+import feign.RetryableException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/products")
+@Component
 public class ProductController {
 
     private final ProductClient productClient;
 
-    @Autowired
     public ProductController(ProductClient productClient) {
         this.productClient = productClient;
     }
 
-    @GetMapping("/isProduct")
     public boolean areProdcutsInStock(@RequestParam String pName, @RequestParam int pQuantity) {
         return productClient.isProductInStock(pName, pQuantity);
     }
 
-    @GetMapping("/getAll")
-    public void getProducts() {
-        List<Product> products = productClient.getProducts();
-        for (Product product : products) {
-            System.out.println(product);
-        }
-    }
 
-    @PostMapping("/add")
-    public boolean addProduct(@RequestBody Product product) {
+    public boolean addProduct(Product product) {
         boolean result = productClient.addProduct(product);
 
         if (result) {
@@ -50,12 +41,32 @@ public class ProductController {
         return productClient.deleteProduct(product.getpName());
     }
 
-    public boolean changeQuantity(String pName, int pQuantity) {
-        return productClient.changeQuantity(pName, pQuantity);
+    public boolean changeQuantity(List<Product> products, String actionID) throws InterruptedException {
+        try {
+            return productClient.changeQuantity(products, actionID);
+        } catch (RetryableException e) {
+            System.out.println("Timeout error: " + e.getMessage());
+            Thread.sleep(3000);
+            ActionStatus status = getSingleAction(actionID);
+            return timeoutExceptionHandler(status);
+        } catch (FeignException e) {
+            System.out.println("FeignException: " + e.getMessage());
+        }
+        return false;
     }
-    public List<Product> createBasket(CreateBasketRequestDTO createBasketRequestDTO){
+
+    public List<Product> createBasket(CreateBasketRequestDTO createBasketRequestDTO) {
         return productClient.createBasket(createBasketRequestDTO);
     }
 
+    public ActionStatus getSingleAction(String actionID) {
+        return productClient.getSingleAction(actionID);
+    }
+
+    private boolean timeoutExceptionHandler(ActionStatus actionStatus) {
+        if (actionStatus == null) {
+            return false;
+        } else return actionStatus.getStatus().equals("SUCCESS");
+    }
 
 }

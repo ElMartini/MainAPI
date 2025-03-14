@@ -1,6 +1,7 @@
 package com.example.mainapi.client;
 
 
+import com.example.mainapi.configuration.FeignConfig;
 import com.example.mainapi.dto.BasketDTO;
 import com.example.mainapi.model.CustomerOrders;
 import com.example.mainapi.model.Order;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(value = "order", url = "http://localhost:8082")
+@FeignClient(value = "order", url = "http://localhost:8082", configuration = FeignConfig.class)
 public interface OrderClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/api/orders/all")

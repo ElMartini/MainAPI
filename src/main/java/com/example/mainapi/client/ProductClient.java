@@ -1,7 +1,9 @@
 package com.example.mainapi.client;
 
 
+import com.example.mainapi.configuration.FeignConfig;
 import com.example.mainapi.dto.CreateBasketRequestDTO;
+import com.example.mainapi.model.ActionStatus;
 import com.example.mainapi.model.Product;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -9,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(value = "product", url = "http://localhost:8081")
+@FeignClient(value = "product", url = "http://localhost:8081", configuration = FeignConfig.class)
 public interface ProductClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/api/products/isInStock")
@@ -31,10 +33,13 @@ public interface ProductClient {
     @RequestMapping(method = RequestMethod.GET, value = "/api/products/select")
     List<Product> selectProducts(@RequestBody List<String> productNames);
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/api/products/changeQuantity")
-    boolean changeQuantity(@RequestParam String pName, @RequestParam int pQuantity);
+    @RequestMapping(method = RequestMethod.POST, value = "/api/products/changeQuantity")
+    boolean changeQuantity(@RequestBody List<Product> products, @RequestParam String actionID);
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/products/createBasket")
     List<Product> createBasket(@RequestBody CreateBasketRequestDTO createBasketRequestDTO);
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/api/productAction/getSingleAction")
+    ActionStatus getSingleAction(@RequestParam String actionID);
 
 }
