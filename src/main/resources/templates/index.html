@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Main API Actions</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        .container { max-width: 600px; margin: auto; background: #f4f4f4; padding: 20px; border-radius: 10px; }
+        .btn { display: block; width: 100%; margin: 10px 0; padding: 10px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .message { color: green; font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Main API Actions</h1>
+
+    <!-- Success Message -->
+    <p th:if="${message}" th:text="${message}" class="message"></p>
+
+    <form action="/api/v1/testOutbox" method="post">
+        <button class="btn">Test Outbox</button>
+    </form>
+
+    <form action="/api/v1/testBasket" method="post">
+        <button class="btn">Create Basket</button>
+    </form>
+
+    <form action="/api/v1/testAddProduct" method="post">
+        <button class="btn">Add Product</button>
+    </form>
+
+    <form action="/api/v1/testAddCustomer" method="post">
+        <button class="btn">Add Customer</button>
+    </form>
+
+    <form action="/api/v1/testTimeOut" method="post">
+        <button class="btn">Test Timeout</button>
+    </form>
+</div>
+</body>
+</html>

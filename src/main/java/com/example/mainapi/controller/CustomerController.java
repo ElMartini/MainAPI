@@ -29,12 +29,13 @@ public class CustomerController {
             return customerClient.updateWallet(ciDwithValue, actionID);
         } catch (RetryableException e) {
             System.out.println("Timeout error: " + e.getMessage());
+            Thread.sleep(3000);
             ActionStatus status = getSingleAction(actionID);
             return timeoutExceptionHandler(status);
         } catch (FeignException e) {
-            System.out.println("FeignException: Other Feign error");
-            return false;
+            System.out.println("FeignException: " + e.getMessage());
         }
+        return false;
     }
 
     public boolean areCreditsInWallet(CIDwithValue ciDwithValue) {

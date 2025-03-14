@@ -7,9 +7,12 @@ import lombok.SneakyThrows;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.swing.*;
 import java.net.ConnectException;
@@ -21,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-@RestController
+@Controller
 @RequestMapping("/api/v1")
 public class MainAction {
 
@@ -254,29 +257,34 @@ public class MainAction {
         else return null;
     }
 
-    @RequestMapping("/testOutbox")
-    public void testOutbox() throws ExecutionException, InterruptedException, TimeoutException {
+    @PostMapping("/testOutbox")
+    public String testOutbox(RedirectAttributes redirectAttributes) throws ExecutionException, InterruptedException, TimeoutException {
         buyWithOutBox(88718789, "fe604abf-e35d-4eda-b5bd-44e1dfcc225b");
+        redirectAttributes.addFlashAttribute("message", "Outbox Test Completed!");
+        return "redirect:/";
     }
 
-    @RequestMapping("/testBasket")
-    public void testCreateBasket() {
+    @PostMapping("/testBasket")
+    public String testCreateBasket(RedirectAttributes redirectAttributes) {
         orderController.createBasket();
+        redirectAttributes.addFlashAttribute("message", "Basket Created!");
+        return "redirect:/";
     }
 
-    @RequestMapping("/testAddProduct")
-    public void testAddProduct() {
+    @PostMapping("/testAddProduct")
+    public String testAddProduct(RedirectAttributes redirectAttributes) {
         Product product = new Product();
         product.setpName("TestProduct");
         product.setpPrice(19.99);
         product.setpQuantity(100);
 
         productController.addProduct(product);
+        redirectAttributes.addFlashAttribute("message", "Product Added!");
+        return "redirect:/";
     }
 
-    @RequestMapping("testAddCustomer")
-    public void testCreateCustomer() {
-
+    @PostMapping("/testAddCustomer")
+    public String testCreateCustomer(RedirectAttributes redirectAttributes) {
         Customer customer = new Customer();
         customer.setcFirstName("Jan");
         customer.setcLastName("Kowalski");
@@ -284,19 +292,20 @@ public class MainAction {
         customer.setcPassword("haslo123");
 
         customerController.createNewCustomer(customer);
+        redirectAttributes.addFlashAttribute("message", "Customer Added!");
+        return "redirect:/";
     }
 
-
-    @RequestMapping("testTimeOut")
-    public void timeOutTest() throws InterruptedException {
-
+    @PostMapping("/testTimeOut")
+    public String timeOutTest(RedirectAttributes redirectAttributes) throws InterruptedException {
         CIDwithValue ciDwithValue = new CIDwithValue();
         ciDwithValue.setChangeValue(-1000);
         ciDwithValue.setcID("fe604abf-e35d-4eda-b5bd-44e1dfcc225b");
         String actionID = "fe604abf-e35d-4eda-b5bd-44e1dfcc225b";
 
-        System.out.println(customerController.changeWalletValue(ciDwithValue,actionID));
-
+        System.out.println(customerController.changeWalletValue(ciDwithValue, actionID));
+        redirectAttributes.addFlashAttribute("message", "Timeout Test Completed!");
+        return "redirect:/";
     }
 
 }
