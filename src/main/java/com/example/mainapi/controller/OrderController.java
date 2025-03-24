@@ -42,7 +42,7 @@ public class OrderController {
         basketDTO.setProducts(productController.createBasket(createBasketRequestDTO));
         basketDTO.setcID("fe604abf-e35d-4eda-b5bd-44e1dfcc225b");
 
-        if (createOrderFromBasket(basketDTO)) System.out.println("Nojs");
+        if (createOrderFromBasket(basketDTO)) System.out.println("Success");
 
     }
 
