@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+<h1>Product List</h1>
+<button onclick="window.location.href = 'http://localhost:8080/productService.html';">Product Service</button>
+<table id="productTable">
+    <thead>
+    <tr>
+        <th>Product ID</th>
+        <th>Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    async function fetchProducts() {
+        try {
+            const response = await fetch('http://localhost:8081/api/products/all');
+            if (!response.ok) {
+                throw new Error(`Error fetching data: ${response.statusText}`);
+            }
+
+            const products = await response.json();
+
+            console.log('Fetched products:', products);
+
+            const tableBody = document.getElementById('productTable').querySelector('tbody');
+
+            tableBody.innerHTML = '';
+
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.pID || 'N/A'}</td>
+                    <td>${product.pName || 'N/A'}</td>
+                    <td>${product.pQuantity || 0}</td>
+                    <td>${(product.pPrice || 0).toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error:', error.message);
+            alert(error);
+        }
+    }
+
+    window.onload = fetchProducts;
+</script>
+</body>
+</html>

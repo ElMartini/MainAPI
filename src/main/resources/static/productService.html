@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .response {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<button onclick="window.location.href = '/';">Cofnij</button>
+<h1>Product Manager</h1>
+<form id="productForm">
+    <label for="action">Action:</label>
+    <select id="action" name="action" required>
+        <option value="" disabled selected>Select Action</option>
+        <option value="ADD">ADD</option>
+        <option value="DELETE">DELETE</option>
+        <option value="UPDATE">UPDATE</option>
+        <option value="GET">GET</option>
+    </select>
+
+    <label for="pID">Product ID (for UPDATE/DELETE/GET):</label>
+    <input type="text" id="pID" name="pID">
+
+    <label for="pName">Product Name:</label>
+    <input type="text" id="pName" name="pName">
+
+    <label for="pQuantity">Product Quantity:</label>
+    <input type="number" id="pQuantity" name="pQuantity">
+
+    <label for="pPrice">Product Price:</label>
+    <input type="number" id="pPrice" name="pPrice" step="0.01">
+
+    <button type="submit">Submit</button>
+</form>
+
+<div class="response" id="response"></div>
+
+<script>
+    document.getElementById('productForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const action = document.getElementById('action').value;
+
+        if (action === "GET") {
+            window.location.href = 'http://localhost:8080/getProducts.html';
+            return;
+        }
+
+        const pID = document.getElementById('pID').value;
+        const pName = document.getElementById('pName').value;
+        const pQuantity = document.getElementById('pQuantity').value;
+        const pPrice = document.getElementById('pPrice').value;
+
+        const product = { pID, pName, pQuantity: parseInt(pQuantity), pPrice: parseFloat(pPrice) };
+        const productDTO = { action, product };
+
+        try {
+            const response = await fetch('/api/products/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productDTO),
+            });
+
+            document.getElementById('response').innerText = await response.text();
+        } catch (error) {
+            document.getElementById('response').innerText = 'Error: ' + error.message;
+        }
+    });
+</script>
+</body>
+</html>
