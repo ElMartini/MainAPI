@@ -75,7 +75,7 @@ public class MainAction {
     }
 
 
-    private List<Product> customerOrderToProductsList(CustomerOrders customerOrders) throws ExecutionException, InterruptedException {
+    private List<Product> customerOrderToProductsList(CustomerOrders customerOrders){
         List<Order> orders = orderController.consumerOrderToOrderList(customerOrders);
         List<Product> products = new ArrayList<>();
         for (Order o : orders) {
@@ -106,27 +106,34 @@ public class MainAction {
         CIDwithValue walletValue = new CIDwithValue(customerOrders.getcID(), -customerOrders.getoValue());
 
         CompletableFuture<Boolean> productsActions;
-        CompletableFuture<Boolean> walletAction;
+        CompletableFuture<Boolean> walletActions;
         boolean productBasic;
         boolean walletBasic;
         try {
             productsActions = changeProductQuantity(products, actionID);
-            walletAction = changeWalletValue(walletValue, actionID);
-            CompletableFuture.allOf(productsActions, walletAction).join();
+            walletActions = changeWalletValue(walletValue, actionID);
+            CompletableFuture.allOf(productsActions, walletActions).join();
 
             boolean productResult = productsActions.get();
-            boolean walletResult = walletAction.get();
+            boolean walletResult = walletActions.get();
             productBasic = !productResult;
             walletBasic = !walletResult;
 
             while (walletBasic != productBasic) {
-                System.out.println("Rollback");
                 try {
                     if (!productBasic) {
-                        productBasic = productRollback(products, actionID);
+                        boolean rollbackSuccess = productRollback(products, actionID);
+                        if (!rollbackSuccess) {
+                            System.err.println("Product rollback failed. Exiting rollback.");
+                        }
+                        productBasic = rollbackSuccess;
                     }
                     if (!walletBasic) {
-                        walletBasic = walletRollback(walletValue, actionID);
+                        boolean rollbackSuccess = walletRollback(walletValue, actionID);
+                        if (!rollbackSuccess) {
+                            System.err.println("Wallet rollback failed. Exiting rollback.");
+                        }
+                        walletBasic = rollbackSuccess;
                     }
 
                 } catch (InterruptedException | ExecutionException e) {
@@ -136,9 +143,11 @@ public class MainAction {
             }
 
 
-            if (productBasic) {
-                outBoxAction(customerOrders, products, actionID);
-            }
+
+                if (productBasic && walletBasic) {
+                    outBoxAction(customerOrders, products, actionID);
+                }
+
 
 
         } catch (InterruptedException | ExecutionException e) {
@@ -150,11 +159,17 @@ public class MainAction {
 
 
     boolean productRollback(List<Product> products, String actionID) throws ExecutionException, InterruptedException {
+        System.out.println("Rollback Product Base");
+
         CompletableFuture<Boolean> productsActionsRollback = changeProductQuantityRollback(products, actionID);
 
         CompletableFuture.allOf(productsActionsRollback).join();
 
-        return (productsActionsRollback.get());
+        boolean rollbackSuccess = productsActionsRollback.get();
+        if (!rollbackSuccess) {
+            System.err.println("Product rollback failed. Exiting rollback.");
+        }
+        return rollbackSuccess;
     }
 
     boolean walletRollback(CIDwithValue ciDwithValue, String actionID) throws ExecutionException, InterruptedException {
@@ -167,17 +182,24 @@ public class MainAction {
 
     @Async
     public CompletableFuture<Boolean> changeProductQuantity(List<Product> products, String actionID) throws InterruptedException {
-//        Thread.sleep(5000);
-        for (Product p : products) {
-            p.setpQuantity(-p.getpQuantity());
-        }
-        try {
-            boolean isCompleted = productController.changeQuantity(products, actionID);
+        System.out.println("Action Product");
+        Thread.sleep(5000);
 
+
+        List<Product> tmpProducts = new ArrayList<>();
+        for (Product p : products) {
+            tmpProducts.add(new Product(p.getpID(), p.getpName(), -p.getpQuantity(), p.getpPrice()));
+        }
+
+        try {
+            boolean isCompleted = productController.changeQuantity(tmpProducts, actionID, false);
+            System.out.println(isCompleted);
+            tmpProducts.clear();
             return CompletableFuture.completedFuture(isCompleted);
         } catch (
                 FeignException e) {
             System.err.println("Feign Client Error: " + e.getMessage());
+            System.out.println("error");
             return CompletableFuture.completedFuture(false);
         }
 
@@ -185,10 +207,15 @@ public class MainAction {
 
     @Async
     public CompletableFuture<Boolean> changeWalletValue(CIDwithValue ciDwithValue, String actionID) throws InterruptedException {
-//        Thread.sleep(5000);
+        Thread.sleep(5000);
+        System.out.println("Action Wallet");
+
         try {
-            return CompletableFuture.completedFuture(customerController.changeWalletValue(ciDwithValue, actionID));
+            boolean isCompleted = customerController.changeWalletValue(ciDwithValue, actionID);
+            System.out.println(isCompleted);
+            return CompletableFuture.completedFuture(isCompleted);
         } catch (FeignException e) {
+            System.out.println("error");
             System.err.println("Feign Client Error: " + e.getMessage());
             return CompletableFuture.completedFuture(false);
         }
@@ -196,9 +223,10 @@ public class MainAction {
 
     @Async
     public CompletableFuture<Boolean> changeProductQuantityRollback(List<Product> products, String actionID) throws InterruptedException {
+        System.out.println("Rollback Product");
         try {
-            boolean isCompleted = productController.changeQuantity(products, actionID);
-
+            boolean isCompleted = productController.changeQuantity(products, actionID, true);
+            System.out.println(isCompleted);
             return CompletableFuture.completedFuture(isCompleted);
         } catch (
                 FeignException e) {
@@ -210,6 +238,8 @@ public class MainAction {
 
     @Async
     public CompletableFuture<Boolean> changeWalletValueRollback(CIDwithValue ciDwithValue, String actionID) {
+        System.out.println("Rollback Wallet");
+
         ciDwithValue.setChangeValue(-ciDwithValue.getChangeValue());
         try {
             return CompletableFuture.completedFuture(customerController.changeWalletValue(ciDwithValue, actionID));

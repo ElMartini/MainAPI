@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Product implements Serializable {
@@ -25,6 +23,15 @@ public class Product implements Serializable {
 
     @JsonProperty("pPrice")
     private double pPrice;
+
+
+    public Product(String pID, String pName, int pQuantity, double pPrice) {
+        this.pID = pID;
+        this.pName = pName;
+        this.pQuantity = pQuantity;
+        this.pPrice = pPrice;
+    }
+    public Product(){}
 
     @Override
     public String toString() {

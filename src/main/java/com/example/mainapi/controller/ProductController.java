@@ -41,14 +41,14 @@ public class ProductController {
         return productClient.deleteProduct(product.getpName());
     }
 
-    public boolean changeQuantity(List<Product> products, String actionID) throws InterruptedException {
+    public boolean changeQuantity(List<Product> products, String actionID, boolean rollback) throws InterruptedException {
         try {
-            return productClient.changeQuantity(products, actionID);
+            return productClient.changeQuantity(products, actionID, rollback);
         } catch (RetryableException e) {
             System.out.println("Timeout error: " + e.getMessage());
             Thread.sleep(3000);
             ActionStatus status = getSingleAction(actionID);
-            return timeoutExceptionHandler(status);
+            return status != null && status.getStatus().equals("SUCCESS");
         } catch (FeignException e) {
             System.out.println("FeignException: " + e.getMessage());
         }
@@ -63,10 +63,5 @@ public class ProductController {
         return productClient.getSingleAction(actionID);
     }
 
-    private boolean timeoutExceptionHandler(ActionStatus actionStatus) {
-        if (actionStatus == null) {
-            return false;
-        } else return actionStatus.getStatus().equals("SUCCESS");
-    }
 
 }

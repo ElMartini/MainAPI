@@ -34,7 +34,7 @@ public interface ProductClient {
     List<Product> selectProducts(@RequestBody List<String> productNames);
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/products/changeQuantity")
-    boolean changeQuantity(@RequestBody List<Product> products, @RequestParam String actionID);
+    boolean changeQuantity(@RequestBody List<Product> products, @RequestParam String actionID, @RequestParam Boolean rollback);
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/products/createBasket")
     List<Product> createBasket(@RequestBody CreateBasketRequestDTO createBasketRequestDTO);
