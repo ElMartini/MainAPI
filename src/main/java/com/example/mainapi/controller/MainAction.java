@@ -211,7 +211,7 @@ public class MainAction {
         System.out.println("Action Wallet");
 
         try {
-            boolean isCompleted = customerController.changeWalletValue(ciDwithValue, actionID);
+            boolean isCompleted = customerController.changeWalletValue(ciDwithValue, actionID, false);
             System.out.println(isCompleted);
             return CompletableFuture.completedFuture(isCompleted);
         } catch (FeignException e) {
@@ -242,7 +242,7 @@ public class MainAction {
 
         ciDwithValue.setChangeValue(-ciDwithValue.getChangeValue());
         try {
-            return CompletableFuture.completedFuture(customerController.changeWalletValue(ciDwithValue, actionID));
+            return CompletableFuture.completedFuture(customerController.changeWalletValue(ciDwithValue, actionID, true));
         } catch (FeignException e) {
             System.err.println("Feign Client Error: " + e.getMessage());
             return CompletableFuture.completedFuture(false);
@@ -323,7 +323,7 @@ public class MainAction {
         ciDwithValue.setcID("fe604abf-e35d-4eda-b5bd-44e1dfcc225b");
         String actionID = "fe604abf-e35d-4eda-b5bd-44e1dfcc225b";
 
-        System.out.println(customerController.changeWalletValue(ciDwithValue, actionID));
+        System.out.println(customerController.changeWalletValue(ciDwithValue, actionID, false));
         redirectAttributes.addFlashAttribute("message", "Timeout Test Completed!");
         return "redirect:/";
     }
