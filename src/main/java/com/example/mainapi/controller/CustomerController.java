@@ -24,9 +24,9 @@ public class CustomerController {
     public void sendCustomerWalletRequset(CustomerWalletDTO customerWalletDTO) {
     }
 
-    public boolean changeWalletValue(CIDwithValue ciDwithValue, String actionID) throws InterruptedException {
+    public boolean changeWalletValue(CIDwithValue ciDwithValue, String actionID, boolean rollback) throws InterruptedException {
         try {
-            return customerClient.updateWallet(ciDwithValue, actionID);
+            return customerClient.updateWallet(ciDwithValue, actionID, rollback);
         } catch (RetryableException e) {
             System.out.println("Timeout error: " + e.getMessage());
             Thread.sleep(3000);

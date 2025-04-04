@@ -35,7 +35,7 @@ public interface CustomerClient {
     boolean updateCustomer(@RequestBody Customer customer);
 
     @RequestMapping(method = RequestMethod.PUT, value = "/api/customersWallet/update")
-    boolean updateWallet(@RequestBody CIDwithValue ciDwithValue,@RequestParam String actionID);
+    boolean updateWallet(@RequestBody CIDwithValue ciDwithValue,@RequestParam String actionID, @RequestParam boolean rollback);
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/customersWallet/areCredits")
     boolean areCreditsInWallet(@RequestBody CIDwithValue ciDwithValue);
