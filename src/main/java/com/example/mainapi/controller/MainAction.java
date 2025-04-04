@@ -43,24 +43,34 @@ public class MainAction {
     public boolean buyWithOutBox(int oNumber, String cID) throws ExecutionException, InterruptedException, TimeoutException {
         CustomerOrders customerOrders = orderController.getCustomerOrder(oNumber);
 
-        List<Product> products = customerOrderToProductsList(customerOrders);
-        boolean areProductsInStockFlag = true;
-        for (Product p : products) {
-
-            boolean areProductsInStock = productController.areProdcutsInStock(p.getpName(), p.getpQuantity());
-            if (!areProductsInStock) {
-                areProductsInStockFlag = false;
-            }
-        }
-        if (!areProductsInStockFlag) {
-            return false;
-        }
-
-
         CIDwithValue ciDwithValue = new CIDwithValue(cID, customerOrders.getoValue());
         if (!customerController.areCreditsInWallet(ciDwithValue)) {
+            System.out.println("Za mało środków w portfelu");
             return false;
         }
+        List<Product> products = customerOrderToProductsList(customerOrders);
+        System.out.println("Cena zamówienia: "+customerOrders.getoValue());
+
+        for (Product p : products) {
+            boolean areProductsInStock = productController.areProdcutsInStock(p.getpName(), p.getpQuantity());
+            if (!areProductsInStock) {
+                System.out.println("Za mało dostępnych produktów: "+p.getpName());
+                return false;
+            }
+        }
+
+        for (Product p : products) {
+            Reservation reservation = new Reservation();
+            reservation.setcID(cID);
+            reservation.setpName(p.getpName());
+            reservation.setpQuantity(p.getpQuantity());
+            productController.addReservation(reservation);
+
+        }
+
+
+
+
 
         String actionID = createActionID();
         boolean correctID;
@@ -71,6 +81,7 @@ public class MainAction {
             }
         } while (!correctID);
         outBoxAction(customerOrders, products, actionID);
+        productController.deleteReservation(cID);
         return true;
     }
 
@@ -84,6 +95,7 @@ public class MainAction {
             product.setpPrice(o.getpPrice());
             product.setpQuantity(o.getpQuantity());
             products.add(product);
+            System.out.println(product);
         }
         return products;
     }
@@ -279,7 +291,7 @@ public class MainAction {
 
     @PostMapping("/testOutbox")
     public String testOutbox(RedirectAttributes redirectAttributes) throws ExecutionException, InterruptedException, TimeoutException {
-        buyWithOutBox(88718789, "fe604abf-e35d-4eda-b5bd-44e1dfcc225b");
+        buyWithOutBox(46252149, "fe604abf-e35d-4eda-b5bd-44e1dfcc225b");
         redirectAttributes.addFlashAttribute("message", "Outbox Test Completed!");
         return "redirect:/";
     }

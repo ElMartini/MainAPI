@@ -6,6 +6,7 @@ import com.example.mainapi.dto.BasketDTO;
 import com.example.mainapi.dto.CreateBasketRequestDTO;
 import com.example.mainapi.model.CustomerOrders;
 import com.example.mainapi.model.Order;
+import com.example.mainapi.model.Product;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,6 +41,9 @@ public class OrderController {
         createBasketRequestDTO.setpNames(tempNames);
         createBasketRequestDTO.setpQuantities(tempQuantity);
         basketDTO.setProducts(productController.createBasket(createBasketRequestDTO));
+   for(Product p: basketDTO.getProducts()){
+       System.out.println(p);
+   }
         basketDTO.setcID("fe604abf-e35d-4eda-b5bd-44e1dfcc225b");
 
         if (createOrderFromBasket(basketDTO)) System.out.println("Success");
