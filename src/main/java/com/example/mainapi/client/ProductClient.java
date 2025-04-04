@@ -5,6 +5,7 @@ import com.example.mainapi.configuration.FeignConfig;
 import com.example.mainapi.dto.CreateBasketRequestDTO;
 import com.example.mainapi.model.ActionStatus;
 import com.example.mainapi.model.Product;
+import com.example.mainapi.model.Reservation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +42,12 @@ public interface ProductClient {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/api/productAction/getSingleAction")
     ActionStatus getSingleAction(@RequestParam String actionID);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/api/products/reservation/addReservation")
+    boolean addReservation(@RequestBody Reservation reservation);
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/api/products/reservation/deleteReservation")
+    boolean deleteReservation(@RequestParam String cID);
+
 
 }

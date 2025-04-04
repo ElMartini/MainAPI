@@ -5,6 +5,7 @@ import com.example.mainapi.dto.CreateBasketRequestDTO;
 
 import com.example.mainapi.model.ActionStatus;
 import com.example.mainapi.model.Product;
+import com.example.mainapi.model.Reservation;
 import feign.FeignException;
 import feign.RetryableException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,13 @@ public class ProductController {
 
     public ActionStatus getSingleAction(String actionID) {
         return productClient.getSingleAction(actionID);
+    }
+
+    public boolean addReservation(Reservation reservation){
+        return productClient.addReservation(reservation);
+    }
+    public boolean deleteReservation(String cID){
+        return productClient.deleteReservation(cID);
     }
 
 
